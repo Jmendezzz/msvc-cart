@@ -1,6 +1,5 @@
 package com.emazon.cart.domain.usecases.cart;
 
-import com.emazon.cart.domain.exceptions.cart.CartOwnershipException;
 import com.emazon.cart.domain.exceptions.cart.CategoryLimitExceededException;
 import com.emazon.cart.domain.exceptions.cart.NotEnoughStockException;
 import com.emazon.cart.domain.models.Article;
@@ -34,9 +33,8 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
     this.supplyService = supplyService;
   }
   @Override
-  public void addArticleToCart(Long cartId, Long articleId, Integer quantity) {
-    Cart cart = getCart(cartId);
-    validateCartOwnership(cart);
+  public void addArticleToCart(Long articleId, Integer quantity) {
+    Cart cart = getUserCart(authService.getUserId());
 
     Article article = stockService.getArticleById(articleId);
     validateArticleStock(article, quantity);
@@ -45,9 +43,9 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
     updateCart(cart, article, quantity);
   }
 
-  private Cart getCart(Long cartId) {
+  private Cart getUserCart(Long userId) {
     return repository
-            .findById(cartId)
+            .findByUserId(userId)
             .orElseGet(this::createUserCart);
   }
 
@@ -59,11 +57,7 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
     cart.setCreatedAt(LocalDateTime.now());
     cart.setUpdatedAt(LocalDateTime.now());
 
-    return cart;
-  }
-
-  private void validateCartOwnership(Cart cart) {
-    if(!cart.getUserId().equals(authService.getUserId())) throw new CartOwnershipException();
+    return repository.save(cart);
   }
 
   private void validateArticleStock(Article article, Integer quantity) {
@@ -91,7 +85,7 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
 
     return  cartArticles.stream()
             .flatMap(article -> article.categories().stream())
-            .collect(Collectors.groupingBy(Category::id, Collectors.summingInt(category -> 1)));
+            .collect(Collectors.groupingBy(Category::id, Collectors.summingInt(category -> ONE)));
   }
   private List<Article> getCartArticles(Cart cart) {
     List<Long> cartArticleIds = cart.getCartItems().stream()
