@@ -15,6 +15,9 @@ public class CartExceptionConstant {
   public static final String ARTICLE_ID_EMPTY_EXCEPTION_MESSAGE = "Article id is empty";
   public static final String QUANTITY_EMPTY_EXCEPTION_MESSAGE = "Quantity is empty";
 
+  public static final String CART_ITEM_NOT_FOUND_EXCEPTION_MESSAGE = "Article not found in cart";
+  public static final String CART_ITEM_NOT_FOUND_EXCEPTION_CODE = "CART_ITEM_NOT_FOUND_EXCEPTION";
+
   
   private CartExceptionConstant() {
   }
