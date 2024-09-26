@@ -17,6 +17,11 @@ public class SwaggerConstant {
   public static final String ARTICLE_REQUEST_PARAM = "Request body for adding an article to a cart";
   public static final String SUCCESS_RESPONSE = "Successfully added the article to the cart";
   public static final String HTTP_STATUS_200 = "200";
+  public static final String REMOVE_ARTICLE_SUMMARY = "Remove an article from a cart";
+  public static final String REMOVE_ARTICLE_DESC = "This endpoint allows you to remove an article from a cart";
+  public static final String ARTICLE_ID_PARAM_DESC = "ID of the article to be removed from the cart";
+
+
   private SwaggerConstant() {
   }
 }

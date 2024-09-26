@@ -21,7 +21,6 @@ public interface StockFeignMapper {
             .toList();
   }
 
-  // Helper method to map from CategoryResponseDTO to Category
   default Category toCategory(CategoryResponseDTO categoryResponseDTO) {
     return new Category(categoryResponseDTO.id(), categoryResponseDTO.name());
   }

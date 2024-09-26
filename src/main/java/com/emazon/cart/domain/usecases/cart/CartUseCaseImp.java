@@ -1,12 +1,13 @@
 package com.emazon.cart.domain.usecases.cart;
 
+import com.emazon.cart.domain.exceptions.cart.CartItemNotFoundException;
 import com.emazon.cart.domain.exceptions.cart.CategoryLimitExceededException;
 import com.emazon.cart.domain.exceptions.cart.NotEnoughStockException;
 import com.emazon.cart.domain.models.Article;
 import com.emazon.cart.domain.models.Cart;
 import com.emazon.cart.domain.models.CartItem;
 import com.emazon.cart.domain.models.Category;
-import com.emazon.cart.domain.ports.in.usecases.cart.AddArticleToCartUseCase;
+import com.emazon.cart.domain.ports.in.usecases.cart.CartUseCase;
 import com.emazon.cart.domain.ports.out.repositories.CartRepository;
 import com.emazon.cart.domain.ports.out.services.AuthService;
 import com.emazon.cart.domain.ports.out.services.StockService;
@@ -20,14 +21,14 @@ import static com.emazon.cart.domain.utils.constants.CommonConstant.ONE;
 import static com.emazon.cart.domain.utils.constants.cart.CartConstant.MAX_ARTICLES_PER_CATEGORY;
 import static org.hibernate.type.descriptor.java.IntegerJavaType.ZERO;
 
-public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
-  private final CartRepository repository;
+public class CartUseCaseImp implements CartUseCase {
+  private final CartRepository cartRepository;
   private final AuthService authService;
   private final StockService stockService;
   private final SupplyService supplyService;
 
-  public AddArticleToCartUseCaseImp(CartRepository cartRepository, AuthService authService, StockService stockService, SupplyService supplyService) {
-    this.repository = cartRepository;
+  public CartUseCaseImp(CartRepository cartRepository, AuthService authService, StockService stockService, SupplyService supplyService) {
+    this.cartRepository = cartRepository;
     this.authService = authService;
     this.stockService = stockService;
     this.supplyService = supplyService;
@@ -35,16 +36,28 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
   @Override
   public void addArticleToCart(Long articleId, Integer quantity) {
     Cart cart = getUserCart(authService.getUserId());
-
     Article article = stockService.getArticleById(articleId);
-    validateArticleStock(article, quantity);
+
+    validateArticleStockAvailability(cart, article, quantity);
     validateCategoryLimit(cart, article);
 
-    updateCart(cart, article, quantity);
+    updateCartItems(cart, article, quantity);
+  }
+
+  @Override
+  public void removeArticleFromCart(Long articleId) {
+    Cart cart = getUserCart(authService.getUserId());
+    Optional<CartItem> cartItem = getCartItemByArticleId(cart, articleId);
+
+    if(cartItem.isEmpty()) throw new CartItemNotFoundException();
+
+    cart.getCartItems().remove(cartItem.get());
+
+    updateCart(cart);
   }
 
   private Cart getUserCart(Long userId) {
-    return repository
+    return cartRepository
             .findByUserId(userId)
             .orElseGet(this::createUserCart);
   }
@@ -57,16 +70,20 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
     cart.setCreatedAt(LocalDateTime.now());
     cart.setUpdatedAt(LocalDateTime.now());
 
-    return repository.save(cart);
+    return cartRepository.save(cart);
   }
 
-  private void validateArticleStock(Article article, Integer quantity) {
-    Integer articleStock = article.stock();
-    if(articleStock.equals(ZERO)){
+  private void validateArticleStockAvailability(Cart cart, Article article, Integer quantity) {
+    Integer totalQuantityInCart = cart.getCartItems().stream()
+            .filter(cartItem -> cartItem.getArticleId().equals(article.id()))
+            .mapToInt(CartItem::getQuantity)
+            .sum();
+    totalQuantityInCart += quantity;
+
+    if(totalQuantityInCart > article.stock()){
       LocalDateTime nextSupplyDate = supplyService.getNextArticleSupplyDate(article.id());
       throw new NotEnoughStockException(nextSupplyDate);
     }
-    if(articleStock < quantity) throw new NotEnoughStockException(articleStock);
   }
 
   private void validateCategoryLimit(Cart cart, Article article) {
@@ -94,11 +111,8 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
 
     return stockService.getArticlesByIds(cartArticleIds);
   }
-  private void updateCart(Cart cart, Article article, Integer quantity) {
-    Optional<CartItem> existingCartItem = cart.getCartItems().stream()
-            .filter(cartItem -> cartItem.getArticleId().equals(article.id()))
-            .findAny();
-
+  private void updateCartItems(Cart cart, Article article, Integer quantity) {
+    Optional<CartItem> existingCartItem = getCartItemByArticleId(cart, article.id());
     if(existingCartItem.isPresent()){
       CartItem cartItem = existingCartItem.get();
       cartItem.setQuantity(cartItem.getQuantity() + quantity);
@@ -109,8 +123,17 @@ public class AddArticleToCartUseCaseImp implements AddArticleToCartUseCase {
       cart.getCartItems().add(cartItem);
     }
 
+    updateCart(cart);
+  }
+
+  private Optional<CartItem> getCartItemByArticleId(Cart cart, Long articleId) {
+    return cart.getCartItems().stream()
+            .filter(cartItem -> cartItem.getArticleId().equals(articleId))
+            .findAny();
+  }
+  private void updateCart(Cart cart) {
     cart.setUpdatedAt(LocalDateTime.now());
-    repository.save(cart);
+    cartRepository.save(cart);
   }
 
 }

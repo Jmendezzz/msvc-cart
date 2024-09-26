@@ -5,4 +5,5 @@ import com.emazon.cart.application.dtos.common.ResponseDTO;
 
 public interface CartHandler {
   ResponseDTO addArticleToCart(AddArticleToCartRequestDTO addArticleToCartRequestDTO);
+  ResponseDTO removeArticleFromCart(Long articleId);
 }

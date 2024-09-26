@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import static com.emazon.cart.domain.utils.constants.cart.CartConstant.ARTICLE_REMOVED_SUCCESSFULLY_MESSAGE;
 import static com.emazon.cart.infrastructure.utils.constants.SecurityConstant.CUSTOMER_ROLE;
 import static com.emazon.cart.infrastructure.utils.constants.SwaggerConstant.*;
 import static com.emazon.cart.infrastructure.utils.constants.SwaggerConstant.SECURITY_NAME;
@@ -39,12 +40,33 @@ public class CartController {
           security = @SecurityRequirement(name = SECURITY_NAME)
   )
   @PostMapping("/add-article")
-  @PreAuthorize("hasRole('" + CUSTOMER_ROLE + "')")
+  @PreAuthorize(CUSTOMER_ROLE)
   public ResponseEntity<ResponseDTO> addArticleToCart(
           @Valid @RequestBody AddArticleToCartRequestDTO addArticleToCartRequestDTO
           ) {
     return new ResponseEntity<>(
             cartHandler.addArticleToCart(addArticleToCartRequestDTO),
+            HttpStatus.OK
+    );
+  }
+  @Operation(
+          summary = REMOVE_ARTICLE_SUMMARY,
+          description = REMOVE_ARTICLE_DESC,
+          responses = {
+                  @ApiResponse(responseCode = HTTP_STATUS_200, description = ARTICLE_REMOVED_SUCCESSFULLY_MESSAGE, content = @Content(schema = @Schema(implementation = ResponseDTO.class))),
+          },
+          parameters = {
+                  @Parameter(description = ARTICLE_ID_PARAM_DESC, required = true)
+          },
+          security = @SecurityRequirement(name = SECURITY_NAME)
+  )
+  @DeleteMapping("/remove-article/{articleId}")
+  @PreAuthorize(CUSTOMER_ROLE)
+  public ResponseEntity<ResponseDTO> removeArticleFromCart(
+          @PathVariable Long articleId
+  ) {
+    return new ResponseEntity<>(
+            cartHandler.removeArticleFromCart(articleId),
             HttpStatus.OK
     );
   }
