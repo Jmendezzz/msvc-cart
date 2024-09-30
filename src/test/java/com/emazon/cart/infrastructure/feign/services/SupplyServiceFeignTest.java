@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -45,10 +46,10 @@ class SupplyServiceFeignTest {
 
     when(supplyFeignClient.getNextAvailableSupplyForArticle(articleId)).thenReturn(supplyResponseDTO);
 
-    LocalDateTime result = supplyServiceFeignAdapter.getNextArticleSupplyDate(articleId);
+    Optional<LocalDateTime> result = supplyServiceFeignAdapter.getNextArticleSupplyDate(articleId);
 
     assertNotNull(result);
-    assertEquals(expectedSupplyDate, result);
+    assertEquals(expectedSupplyDate, result.get());
     verify(supplyFeignClient).getNextAvailableSupplyForArticle(articleId);
   }
 

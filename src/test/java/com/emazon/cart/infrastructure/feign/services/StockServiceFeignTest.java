@@ -55,7 +55,8 @@ class StockServiceFeignTest {
             "Test Description",
             100.0,
             10,
-            List.of(new Category(1L, "Electronics"))
+            List.of(new Category(1L, "Electronics")),
+            null
     );
   }
 
@@ -94,7 +95,8 @@ class StockServiceFeignTest {
             "Another Description",
             150.0,
             5,
-            List.of(new Category(2L, "Books"))
+            List.of(new Category(2L, "Books")),
+            null
     );
 
     when(stockFeignClient.getArticlesByIds(articleIds)).thenReturn(List.of(articleResponseDTO, articleResponseDTO2));

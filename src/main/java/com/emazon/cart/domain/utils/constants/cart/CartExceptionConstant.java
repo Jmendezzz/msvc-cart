@@ -6,6 +6,7 @@ public class CartExceptionConstant {
 
   public static final String NOT_ENOUGH_STOCK_EXCEPTION_MESSAGE = "Not enough stock for this article, stock available: %d";
   public static final String NOT_STOCK_EXCEPTION_MESSAGE = "No stock available for this article, next stock supply: %s";
+  public static final String NOT_STOCK_FOUND_EXCEPTION = "No stock supply found for this article";
   public static final String NOT_ENOUGH_STOCK_EXCEPTION_CODE = "NOT_ENOUGH_STOCK_EXCEPTION";
 
   public static final String CATEGORY_LIMIT_EXCEEDED_EXCEPTION_MESSAGE = "Category limit exceeded for category: %s";
