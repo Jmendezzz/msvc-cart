@@ -14,4 +14,7 @@ public class NotEnoughStockException extends BusinessException {
   public NotEnoughStockException(LocalDateTime nextSupplyDate) {
     super(String.format(NOT_STOCK_EXCEPTION_MESSAGE,nextSupplyDate.format(ISO_LOCAL_DATE_TIME)), NOT_ENOUGH_STOCK_EXCEPTION_CODE);
   }
+  public NotEnoughStockException() {
+    super(NOT_STOCK_FOUND_EXCEPTION, NOT_ENOUGH_STOCK_EXCEPTION_CODE);
+  }
 }
