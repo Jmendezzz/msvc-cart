@@ -1,8 +1,9 @@
 package com.emazon.cart.infrastructure.adapters.out.services;
 
-import com.emazon.cart.domain.models.Article;
+import com.emazon.cart.domain.models.*;
 import com.emazon.cart.domain.ports.out.services.StockService;
 import com.emazon.cart.infrastructure.adapters.out.feign.clients.StockFeignClient;
+import com.emazon.cart.infrastructure.adapters.out.feign.dtos.ArticleSearchRequestDTO;
 import com.emazon.cart.infrastructure.adapters.out.feign.mappers.StockFeignMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,18 @@ public class StockServiceFeignAdapter implements StockService {
     return stockFeignClient.getArticlesByIds(articleIds).stream()
             .map(mapper::toArticle)
             .toList();
+  }
+
+  @Override
+  public Paginated<Article> getArticlesByCriteria(Pagination pagination, Sorting sorting, ArticleSearchCriteria articleSearchCriteria) {
+    return mapper.toArticlePaginated(stockFeignClient.getArticlesByCriteria
+            (
+                    pagination.page(),
+                    pagination.size(),
+                    sorting.field(),
+                    sorting.direction(),
+                    articleSearchCriteria
+            )
+    );
   }
 }

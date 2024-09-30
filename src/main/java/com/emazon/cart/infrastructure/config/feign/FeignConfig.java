@@ -1,6 +1,7 @@
 package com.emazon.cart.infrastructure.config.feign;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Logger;
 import feign.codec.ErrorDecoder;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 public class FeignConfig {
   private final ObjectMapper objectMapper;
+
   @Bean
   public JwtTokenInterceptor jwtTokenInterceptor() {
     return new JwtTokenInterceptor();
@@ -19,6 +21,9 @@ public class FeignConfig {
   public ErrorDecoder feignErrorDecoderConfig() {
     return new FeignErrorDecoderConfig(objectMapper);
   }
-
-
+  @Bean
+  Logger.Level feignLoggerLevel() {
+    return Logger.Level.FULL;
+  }
 }
+

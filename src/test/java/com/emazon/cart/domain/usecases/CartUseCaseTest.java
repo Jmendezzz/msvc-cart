@@ -64,7 +64,8 @@ class CartUseCaseTest {
             "Test Description",
             10.0,
             10,
-            List.of(new Category(1L, "Category"))
+            List.of(new Category(1L, "Category")),
+            null
     );
 
     when(authService.getUserId()).thenReturn(1L);
@@ -99,11 +100,12 @@ class CartUseCaseTest {
             "Description",
             10.0,
             0,
-            List.of(new Category(1L, "Category"))
+            List.of(new Category(1L, "Category")),
+            null
     );
     when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
     when(stockService.getArticleById(articleId)).thenReturn(article);
-    when(supplyService.getNextArticleSupplyDate(articleId)).thenReturn(LocalDateTime.now().plusDays(10));
+    when(supplyService.getNextArticleSupplyDate(articleId)).thenReturn(Optional.of(LocalDateTime.now().plusDays(10)));
 
     assertThrows(NotEnoughStockException.class, () -> cartUseCaseImp.addArticleToCart(articleId, quantity));
   }
@@ -116,11 +118,12 @@ class CartUseCaseTest {
             "Description",
             10.0,
             2,
-            List.of(new Category(1L, "Category"))
+            List.of(new Category(1L, "Category")),
+            null
     );
     when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
     when(stockService.getArticleById(articleId)).thenReturn(article);
-    when(supplyService.getNextArticleSupplyDate(articleId)).thenReturn(LocalDateTime.now().plusDays(10));
+    when(supplyService.getNextArticleSupplyDate(articleId)).thenReturn(Optional.of(LocalDateTime.now().plusDays(10)));
 
     assertThrows(NotEnoughStockException.class, () -> cartUseCaseImp.addArticleToCart(articleId, quantity));
   }
@@ -128,9 +131,9 @@ class CartUseCaseTest {
   @Test
   void whenCategoryLimitIsExceeded_ShouldThrowCategoryLimitExceededException() {
     List<Article> cartArticles = List.of(
-            new Article(3L, "Article 1", "Description", 10.0, 2, List.of(new Category(1L, "Category"))),
-            new Article(4L, "Article 2", "Description", 10.0, 2, List.of(new Category(1L, "Category"))),
-            new Article(5L, "Article 3", "Description", 10.0, 2, List.of(new Category(1L, "Category")))
+            new Article(3L, "Article 1", "Description", 10.0, 2, List.of(new Category(1L, "Category")),null),
+            new Article(4L, "Article 2", "Description", 10.0, 2, List.of(new Category(1L, "Category")), null),
+            new Article(5L, "Article 3", "Description", 10.0, 2, List.of(new Category(1L, "Category")), null)
     );
 
     when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
@@ -170,7 +173,7 @@ class CartUseCaseTest {
   @Test
   void whenCategoryLimitIsNotExceeded_ShouldAddArticleToCart() {
     List<Article> cartArticles = List.of(
-            new Article(3L, "Article 1", "Description", 10.0, 2, List.of(new Category(1L, "Category")))
+            new Article(3L, "Article 1", "Description", 10.0, 2, List.of(new Category(1L, "Category")), null)
     );
 
     when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));

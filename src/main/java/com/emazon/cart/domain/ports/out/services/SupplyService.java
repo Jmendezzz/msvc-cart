@@ -1,8 +1,9 @@
 package com.emazon.cart.domain.ports.out.services;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface SupplyService {
-  LocalDateTime getNextArticleSupplyDate(Long articleId);
+  Optional<LocalDateTime> getNextArticleSupplyDate(Long articleId);
 
 }
