@@ -1,21 +1,21 @@
 package com.emazon.cart.domain.models;
 
 public class ArticlesCart {
-  private Paginated<Article> paginatedArticles;
+  private Paginated<CartArticleItem> paginatedArticles;
   private Double totalPrice;
 
-  public ArticlesCart(Paginated<Article> paginatedArticles, Double totalPrice) {
+  public ArticlesCart(Paginated<CartArticleItem> paginatedArticles, Double totalPrice) {
     this.paginatedArticles = paginatedArticles;
     this.totalPrice = totalPrice;
   }
   public ArticlesCart() {
   }
 
-  public Paginated<Article> getPaginatedArticles() {
+  public Paginated<CartArticleItem> getPaginatedArticles() {
     return paginatedArticles;
   }
 
-  public void setPaginatedArticles(Paginated<Article> paginatedArticles) {
+  public void setPaginatedArticles(Paginated<CartArticleItem> paginatedArticles) {
     this.paginatedArticles = paginatedArticles;
   }
 
