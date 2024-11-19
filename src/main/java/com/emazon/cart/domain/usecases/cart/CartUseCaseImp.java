@@ -60,13 +60,16 @@ public class CartUseCaseImp implements CartUseCase {
     List<Long> cartArticleIds = getCartArticleIds(cart);
     ArticleSearchCriteria cartSearchCriteria = searchCriteria.withArticleIds(cartArticleIds);
 
+    if(cartArticleIds.isEmpty()) return getEmptyArticleItems();
+
     Paginated<Article> paginatedArticles = stockService.getArticlesByCriteria(pagination, sorting, cartSearchCriteria);
     List<Article> articles = setArticlesNextSupplyDate(paginatedArticles.getData());
     paginatedArticles.setData(articles);
 
+    Paginated<CartArticleItem> paginatedCartArticleItems = getPaginatedCartArticleItems(cart,paginatedArticles);
     Double totalPrice = calculateCartTotalPrice(cart);
 
-    return new ArticlesCart(paginatedArticles, totalPrice);
+    return new ArticlesCart(paginatedCartArticleItems, totalPrice);
   }
 
   private Cart getUserCart(Long userId) {
@@ -169,13 +172,33 @@ public class CartUseCaseImp implements CartUseCase {
   }
   private List<Article> setArticlesNextSupplyDate(List<Article> articles) {
     return articles.stream()
-            .map(article -> Objects.equals(article.stock(), ZERO) ? article.withSupplyDate(getNextSupplyDate(article.id())) : article)
+            .map(article -> article.withSupplyDate(getNextSupplyDate(article.id())))
             .toList();
   }
 
   private LocalDateTime getNextSupplyDate(Long articleId) {
     Optional<LocalDateTime> nextSupplyDate = supplyService.getNextArticleSupplyDate(articleId);
     return nextSupplyDate.orElse(null);
+  }
+
+  private List<CartArticleItem> getCartArticleItems(Cart cart, Paginated<Article> paginatedArticles) {
+    return paginatedArticles.getData().stream()
+            .map(article -> {
+              Optional<CartItem> cartItem = getCartItemByArticleId(cart, article.id());
+              Integer quantity = cartItem.map(CartItem::getQuantity).orElse(ZERO);
+              return new CartArticleItem(article, quantity);
+            })
+            .toList();
+  }
+
+  private Paginated<CartArticleItem> getPaginatedCartArticleItems(Cart cart, Paginated<Article> paginatedArticles) {
+    List<CartArticleItem> cartArticleItems = getCartArticleItems(cart, paginatedArticles);
+    return new Paginated<>(cartArticleItems, paginatedArticles.getCurrentPage(), paginatedArticles.getTotalItems(), paginatedArticles.getTotalPages());
+  }
+
+  private ArticlesCart getEmptyArticleItems() {
+    Paginated<CartArticleItem> paginatedCartArticleItems = new Paginated<>(new ArrayList<>(), 0L, 0L, 0L);
+    return new ArticlesCart(paginatedCartArticleItems, 0.0);
   }
   private void updateCart(Cart cart) {
     cart.setUpdatedAt(LocalDateTime.now());
