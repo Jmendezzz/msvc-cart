@@ -72,6 +72,28 @@ public class CartUseCaseImp implements CartUseCase {
     return new ArticlesCart(paginatedCartArticleItems, totalPrice);
   }
 
+  @Override
+  public CartWithArticles getUserCart() {
+    Cart cart = getUserCart(authService.getUserId());
+
+    List<Article> articles = getCartArticles(cart);
+
+    List<CartArticleItem> cartArticleItems = articles.stream()
+            .map(article -> {
+              Optional<CartItem> cartItem = getCartItemByArticleId(cart, article.id());
+              Integer quantity = cartItem.map(CartItem::getQuantity).orElse(ZERO);
+              return new CartArticleItem(article, quantity);
+            })
+            .toList();
+
+    return new CartWithArticles(
+            cart.getId(),
+            cart.getUserId(),
+            cartArticleItems,
+            cart.getCreatedAt(),
+            cart.getUpdatedAt());
+  }
+
   private Cart getUserCart(Long userId) {
     return cartRepository
             .findByUserId(userId)
