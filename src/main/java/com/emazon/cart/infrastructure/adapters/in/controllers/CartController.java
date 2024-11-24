@@ -2,11 +2,13 @@ package com.emazon.cart.infrastructure.adapters.in.controllers;
 
 import com.emazon.cart.application.dtos.cart.AddArticleToCartRequestDTO;
 import com.emazon.cart.application.dtos.cart.ArticlesCartResponseDTO;
+import com.emazon.cart.application.dtos.cart.CartResponseDTO;
 import com.emazon.cart.application.dtos.common.ResponseDTO;
 import com.emazon.cart.application.dtos.pagination.PaginationRequestDTO;
 import com.emazon.cart.application.dtos.searchcriteria.ArticleSearchCriteriaRequestDTO;
 import com.emazon.cart.application.dtos.sorting.SortingRequestDTO;
 import com.emazon.cart.application.handlers.CartHandler;
+import com.emazon.cart.domain.models.CartWithArticles;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -83,6 +85,15 @@ public class CartController {
   ) {
     return new ResponseEntity<>(
             cartHandler.getCartArticles(sorting, pagination, searchCriteria),
+            HttpStatus.OK
+    );
+  }
+
+  @GetMapping("")
+  @PreAuthorize(CUSTOMER_ROLE)
+  public ResponseEntity<CartWithArticles> getUserCart() {
+    return new ResponseEntity<>(
+            cartHandler.getUserCart(),
             HttpStatus.OK
     );
   }

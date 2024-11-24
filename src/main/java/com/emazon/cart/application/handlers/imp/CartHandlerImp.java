@@ -2,6 +2,7 @@ package com.emazon.cart.application.handlers.imp;
 
 import com.emazon.cart.application.dtos.cart.AddArticleToCartRequestDTO;
 import com.emazon.cart.application.dtos.cart.ArticlesCartResponseDTO;
+import com.emazon.cart.application.dtos.cart.CartResponseDTO;
 import com.emazon.cart.application.dtos.common.ResponseDTO;
 import com.emazon.cart.application.dtos.pagination.PaginationRequestDTO;
 import com.emazon.cart.application.dtos.searchcriteria.ArticleSearchCriteriaRequestDTO;
@@ -12,6 +13,7 @@ import com.emazon.cart.application.mappers.PaginationMapperDTO;
 import com.emazon.cart.application.mappers.SearchCriteriaMapperDTO;
 import com.emazon.cart.application.mappers.SortingMapperDTO;
 import com.emazon.cart.domain.models.ArticlesCart;
+import com.emazon.cart.domain.models.CartWithArticles;
 import com.emazon.cart.domain.ports.in.usecases.cart.CartUseCase;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,5 +54,10 @@ public class CartHandlerImp implements CartHandler {
             searchCriteriaMapper.toDomain(searchCriteria)
     );
     return cartMapper.toDTO(articlesCart);
+  }
+
+  @Override
+  public CartWithArticles getUserCart() {
+    return cartUseCase.getUserCart();
   }
 }
